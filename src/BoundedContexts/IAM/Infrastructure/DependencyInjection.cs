@@ -25,9 +25,16 @@ public static class DependencyInjection
 
         services.AddSingleton<IModuleEntityConfiguration, IamEntityConfiguration>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IIdentityVerificationProvider, LocalIdentityVerificationProvider>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<ICommandHandler<LoginCommand, LoginResponse?>, LoginCommandHandler>();
+        services.AddScoped<UserRegistrationService>();
+        services.AddScoped<ICommandHandler<RegisterAgricultorCommand, UserProfileResponse>, RegisterAgricultorCommandHandler>();
+        services.AddScoped<ICommandHandler<RegisterComercianteCommand, UserProfileResponse>, RegisterComercianteCommandHandler>();
+        services.AddScoped<IQueryHandler<GetUserProfileQuery, UserProfileResponse?>, GetUserProfileQueryHandler>();
         services.AddScoped<IamDataSeeder>();
+        services.AddScoped<IamSchemaUpgrade>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
         return services;

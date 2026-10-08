@@ -7,7 +7,8 @@ namespace Muyu.Modules.IAM.Application;
 public sealed class LoginCommandHandler(
     IUserRepository userRepository,
     IPasswordHasher<User> passwordHasher,
-    IJwtProvider jwtProvider) : ICommandHandler<LoginCommand, LoginResponse?>
+    IJwtProvider jwtProvider,
+    IDomainEventPublisher domainEventPublisher) : ICommandHandler<LoginCommand, LoginResponse?>
 {
     public async Task<LoginResponse?> HandleAsync(
         LoginCommand command,
@@ -32,6 +33,9 @@ public sealed class LoginCommandHandler(
         }
 
         var token = jwtProvider.Create(user);
+        await domainEventPublisher.PublishAsync(
+            new UserAuthenticatedDomainEvent(user.Id, DateTimeOffset.UtcNow),
+            cancellationToken);
 
         return new LoginResponse(
             token.Value,

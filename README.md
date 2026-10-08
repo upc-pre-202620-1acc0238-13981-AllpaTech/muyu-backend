@@ -3,7 +3,7 @@
 Backend de Muyu construido como monolito modular en .NET 8, aplicando DDD y CQRS:
 
 - `Muyu.Shared`: entidades base, contrato de configuración modular y `MuyuDbContext` global.
-- `Muyu.Modules.IAM`: dominio de usuarios y roles, autenticación, JWT, repositorio y controlador.
+- `Muyu.Modules.IAM`: gestión de usuarios, registro de agricultores/comerciantes, perfiles, roles, autenticación y JWT.
 - `Muyu.Modules.ParcelManagement`: registro, límites GPS y ciclo de vida de parcelas.
 - `Muyu.Modules.Agreements`: acuerdos de financiamiento y planes ordenados de desembolso.
 - `Muyu.Modules.Escrow`: cuentas de custodia, fondos, reservas y pagos.
@@ -64,7 +64,7 @@ Para desarrollo se crea un usuario inicial desde `appsettings.Development.json`:
 Prueba de login:
 
 ```http
-POST /api/auth/login
+POST /api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -82,7 +82,10 @@ utiliza `evidence-storage` junto a los binarios de ejecución.
 
 ## Endpoints principales
 
-- `POST /api/auth/login`
+- `POST /api/v1/auth/register/agricultor`
+- `POST /api/v1/auth/register/comerciante`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/users/me`
 - `POST|GET /api/parcels`
 - `POST|GET /api/agreements`
 - `POST|GET /api/escrow`
@@ -125,3 +128,10 @@ Cada módulo registra su configuración de entidades mediante `IModuleEntityConf
 Así `MuyuDbContext` sigue siendo global, pero `Muyu.Shared` no conoce las entidades de los
 módulos ni introduce dependencias circulares. `EnsureCreated` facilita esta primera ejecución;
 al evolucionar el esquema se debe sustituir por migraciones de EF Core.
+
+El IAM incluye temporalmente `IamSchemaUpgrade` para actualizar sin pérdida la base SQLite creada
+por la primera versión del prototipo. La validación DNI/RUC usa un adaptador local de demostración;
+el puerto `IIdentityVerificationProvider` permite conectar RENIEC/SUNAT posteriormente.
+
+La correspondencia entre el reporte, los diagramas C4 y la implementación está documentada en
+[`docs/ARCHITECTURE-ALIGNMENT.md`](docs/ARCHITECTURE-ALIGNMENT.md).

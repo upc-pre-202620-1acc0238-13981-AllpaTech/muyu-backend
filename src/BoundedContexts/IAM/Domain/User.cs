@@ -1,4 +1,3 @@
-using System.Net.Mail;
 using Muyu.Shared.Domain;
 
 namespace Muyu.Modules.IAM.Domain;
@@ -9,12 +8,17 @@ public sealed class User : AggregateRoot
     {
     }
 
-    private User(string email, string displayName, Guid roleId)
+    private User(
+        EmailAddress email,
+        string displayName,
+        IdentityDocument identityDocument,
+        Guid roleId)
     {
-        Email = NormalizeEmail(email);
+        Email = email.Value;
         DisplayName = NormalizeDisplayName(displayName);
+        IdentityDocument = identityDocument;
         RoleId = roleId;
-        IsActive = true;
+        Status = UserStatus.Active;
     }
 
     public string Email { get; private set; } = string.Empty;
@@ -23,21 +27,36 @@ public sealed class User : AggregateRoot
 
     public string PasswordHash { get; private set; } = string.Empty;
 
-    public bool IsActive { get; private set; }
+    public IdentityDocument IdentityDocument { get; private set; } = null!;
+
+    public UserStatus Status { get; private set; }
+
+    public bool IsActive => Status is UserStatus.Active;
 
     public Guid RoleId { get; private set; }
 
     public Role? Role { get; private set; }
 
-    public static User Create(string email, string displayName, Guid roleId)
+    public static User Create(
+        string email,
+        string displayName,
+        IdentityDocument identityDocument,
+        Guid roleId)
     {
         if (roleId == Guid.Empty)
         {
             throw new ArgumentException("El rol es obligatorio.", nameof(roleId));
         }
 
-        var user = new User(email, displayName, roleId);
-        user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id, user.Email, DateTimeOffset.UtcNow));
+        ArgumentNullException.ThrowIfNull(identityDocument);
+
+        var user = new User(EmailAddress.Create(email), displayName, identityDocument, roleId);
+        user.RaiseDomainEvent(new UserRegisteredDomainEvent(
+            user.Id,
+            user.Email,
+            identityDocument.Type,
+            identityDocument.Number,
+            DateTimeOffset.UtcNow));
         return user;
     }
 
@@ -50,19 +69,12 @@ public sealed class User : AggregateRoot
 
     public void Deactivate()
     {
-        IsActive = false;
+        Status = UserStatus.Inactive;
         MarkAsUpdated();
         RaiseDomainEvent(new UserDeactivatedDomainEvent(Id, DateTimeOffset.UtcNow));
     }
 
-    public static string NormalizeEmail(string email)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(email);
-
-        var normalized = email.Trim().ToLowerInvariant();
-        _ = new MailAddress(normalized);
-        return normalized;
-    }
+    public static string NormalizeEmail(string email) => EmailAddress.Create(email).Value;
 
     private static string NormalizeDisplayName(string displayName)
     {

@@ -28,7 +28,23 @@ public sealed class IamEntityConfiguration : IModuleEntityConfiguration
         builder.Property(user => user.Email).HasMaxLength(254).IsRequired();
         builder.Property(user => user.DisplayName).HasMaxLength(120).IsRequired();
         builder.Property(user => user.PasswordHash).HasMaxLength(500).IsRequired();
+        builder.Property(user => user.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Ignore(user => user.IsActive);
         builder.HasIndex(user => user.Email).IsUnique();
+
+        builder.OwnsOne(user => user.IdentityDocument, document =>
+        {
+            document.Property(value => value.Type)
+                .HasColumnName("IdentityDocumentType")
+                .HasConversion<string>()
+                .HasMaxLength(10)
+                .IsRequired();
+            document.Property(value => value.Number)
+                .HasColumnName("IdentityDocumentNumber")
+                .HasMaxLength(11)
+                .IsRequired();
+            document.HasIndex(value => value.Number).IsUnique();
+        });
 
         builder
             .HasOne(user => user.Role)

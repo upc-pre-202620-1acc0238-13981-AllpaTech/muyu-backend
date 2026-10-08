@@ -4,6 +4,10 @@ namespace Muyu.Modules.IAM.Domain;
 
 public sealed class Role : BaseEntity
 {
+    public const string Agricultor = "AGRICULTOR";
+    public const string Comerciante = "COMERCIANTE";
+    public const string Administrator = "ADMIN";
+
     private Role()
     {
     }

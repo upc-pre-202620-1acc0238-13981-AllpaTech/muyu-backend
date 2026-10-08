@@ -175,6 +175,9 @@ await using (var scope = app.Services.CreateAsyncScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<MuyuDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
 
+    var iamSchemaUpgrade = scope.ServiceProvider.GetRequiredService<IamSchemaUpgrade>();
+    await iamSchemaUpgrade.ApplyAsync();
+
     var seeder = scope.ServiceProvider.GetRequiredService<IamDataSeeder>();
     await seeder.SeedAsync();
 }
