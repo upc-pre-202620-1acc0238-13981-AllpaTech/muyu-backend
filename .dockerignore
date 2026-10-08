@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+.data/
+.git/
+.idea/
+.keys/
+.vs/
+.vscode/
+evidence-storage/
+*.db
+*.db-shm
+*.db-wal
+*.user
+*.suo
+work/
+README.local.md
