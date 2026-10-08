@@ -12,5 +12,7 @@ public interface IParcelRepository
 
     Task<IReadOnlyList<Parcel>> ListByProducerAsync(Guid producerId, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Parcel>> ListAvailableAsync(CancellationToken cancellationToken = default);
+
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

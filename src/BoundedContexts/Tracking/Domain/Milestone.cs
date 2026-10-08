@@ -66,6 +66,8 @@ public sealed class Milestone : AggregateRoot
         string sha256,
         long sizeBytes,
         DateTimeOffset capturedAtUtc,
+        double latitude,
+        double longitude,
         string? note)
     {
         if (Status is MilestoneStatus.Approved)
@@ -85,6 +87,8 @@ public sealed class Milestone : AggregateRoot
             sha256,
             sizeBytes,
             capturedAtUtc,
+            latitude,
+            longitude,
             note);
 
         _evidences.Add(evidence);

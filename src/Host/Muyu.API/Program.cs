@@ -178,6 +178,9 @@ await using (var scope = app.Services.CreateAsyncScope())
     var iamSchemaUpgrade = scope.ServiceProvider.GetRequiredService<IamSchemaUpgrade>();
     await iamSchemaUpgrade.ApplyAsync();
 
+    var trackingSchemaUpgrade = scope.ServiceProvider.GetRequiredService<TrackingSchemaUpgrade>();
+    await trackingSchemaUpgrade.ApplyAsync();
+
     var seeder = scope.ServiceProvider.GetRequiredService<IamDataSeeder>();
     await seeder.SeedAsync();
 }

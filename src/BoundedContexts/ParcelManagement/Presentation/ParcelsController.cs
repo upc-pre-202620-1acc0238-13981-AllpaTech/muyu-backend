@@ -9,13 +9,16 @@ namespace Muyu.Modules.ParcelManagement.Presentation;
 [ApiController]
 [Authorize]
 [Route("api/parcels")]
+[Route("api/v1/parcels")]
 public sealed class ParcelsController(
     ICommandHandler<RegisterParcelCommand, ParcelResponse> registerHandler,
     IQueryHandler<GetParcelByIdQuery, ParcelResponse?> getByIdHandler,
     IQueryHandler<ListParcelsByProducerQuery, IReadOnlyList<ParcelResponse>> listHandler,
+    IQueryHandler<ListAvailableParcelsQuery, IReadOnlyList<ParcelResponse>> catalogHandler,
     ICommandHandler<ActivateParcelCommand, bool> activateHandler) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = "AGRICULTOR,ADMIN")]
     [ProducesResponseType<ParcelResponse>(StatusCodes.Status201Created)]
     public async Task<ActionResult<ParcelResponse>> Register(
         RegisterParcelCommand command,
@@ -41,10 +44,18 @@ public sealed class ParcelsController(
         Ok(await listHandler.HandleAsync(new ListParcelsByProducerQuery(producerId), cancellationToken));
 
     [HttpPost("{id:guid}/activate")]
+    [HttpPut("{id:guid}/approve")]
+    [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Activate(Guid id, CancellationToken cancellationToken) =>
         await activateHandler.HandleAsync(new ActivateParcelCommand(id), cancellationToken)
             ? NoContent()
             : NotFound();
+
+    [HttpGet("/api/v1/catalog/parcels")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IReadOnlyList<ParcelResponse>>> Catalog(
+        CancellationToken cancellationToken) =>
+        Ok(await catalogHandler.HandleAsync(new ListAvailableParcelsQuery(), cancellationToken));
 }

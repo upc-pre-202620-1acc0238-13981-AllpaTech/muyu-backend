@@ -86,13 +86,19 @@ utiliza `evidence-storage` junto a los binarios de ejecución.
 - `POST /api/v1/auth/register/comerciante`
 - `POST /api/v1/auth/login`
 - `GET /api/v1/users/me`
-- `POST|GET /api/parcels`
-- `POST|GET /api/agreements`
-- `POST|GET /api/escrow`
-- `POST|GET /api/milestones`
-- `POST /api/milestones/{id}/evidences`
-- `POST /api/climate-alerts/monitor`
-- `GET /api/climate-alerts?parcelId={id}`
+- `POST|GET /api/v1/parcels`
+- `PUT /api/v1/parcels/{id}/approve`
+- `GET /api/v1/catalog/parcels`
+- `POST|GET /api/v1/agreements`
+- `PUT /api/v1/agreements/{id}/sign`
+- `POST|GET /api/v1/escrow`
+- `POST /api/v1/escrow/{id}/fund`
+- `POST /api/v1/escrow/{id}/release`
+- `POST|GET /api/v1/milestones`
+- `POST /api/v1/milestones/{id}/evidences`
+- `PUT /api/v1/milestones/{id}/approve|reject`
+- `POST /api/v1/webhooks/weather-update`
+- `GET /api/v1/alerts/{parcelId}`
 
 ## Decisiones de arquitectura
 
@@ -129,8 +135,8 @@ Así `MuyuDbContext` sigue siendo global, pero `Muyu.Shared` no conoce las entid
 módulos ni introduce dependencias circulares. `EnsureCreated` facilita esta primera ejecución;
 al evolucionar el esquema se debe sustituir por migraciones de EF Core.
 
-El IAM incluye temporalmente `IamSchemaUpgrade` para actualizar sin pérdida la base SQLite creada
-por la primera versión del prototipo. La validación DNI/RUC usa un adaptador local de demostración;
+IAM y Tracking incluyen actualizadores de compatibilidad para evolucionar sin pérdida la base SQLite
+creada por la primera versión del prototipo. La validación DNI/RUC usa un adaptador local de demostración;
 el puerto `IIdentityVerificationProvider` permite conectar RENIEC/SUNAT posteriormente.
 
 La correspondencia entre el reporte, los diagramas C4 y la implementación está documentada en

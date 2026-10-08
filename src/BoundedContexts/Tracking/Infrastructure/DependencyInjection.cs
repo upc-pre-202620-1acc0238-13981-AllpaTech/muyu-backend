@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddSingleton<IModuleEntityConfiguration, TrackingEntityConfiguration>();
         services.AddScoped<IMilestoneRepository, MilestoneRepository>();
         services.AddScoped<ICloudStorage, CloudStorage>();
+        services.AddScoped<TrackingSchemaUpgrade>();
         services.AddScoped<ICommandHandler<ScheduleMilestoneCommand, MilestoneResponse>, ScheduleMilestoneCommandHandler>();
         services.AddScoped<IQueryHandler<GetMilestoneByIdQuery, MilestoneResponse?>, GetMilestoneByIdQueryHandler>();
         services.AddScoped<IQueryHandler<ListMilestonesByAgreementQuery, IReadOnlyList<MilestoneResponse>>, ListMilestonesByAgreementQueryHandler>();

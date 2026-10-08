@@ -20,6 +20,18 @@ La verificación externa de DNI/RUC queda definida por `IIdentityVerificationPro
 actual solo valida el formato para el prototipo universitario; no debe describirse como integración
 real con RENIEC o SUNAT.
 
+## Cobertura funcional del reporte
+
+La implementación alcanza aproximadamente un 70% verificable del alcance técnico descrito en la
+sección 2.6. Todos los bounded contexts exponen rutas versionadas `/api/v1` conservando las rutas
+anteriores por compatibilidad. También se implementaron el catálogo público y aprobación de
+parcelas, metadatos GPS de evidencias, aprobación/rechazo de hitos y autorización por roles para
+las operaciones de escritura principales.
+
+Continúan como alcance futuro la validación espacial contra un proveedor satelital, firma digital
+bilateral de acuerdos, OAuth social, integración real RENIEC/SUNAT, broker de mensajes, pasarela
+bancaria real y envío de notificaciones por WhatsApp/SMS.
+
 ## Diferencias con los diagramas C4 entregados
 
 Los diagramas representan una arquitectura objetivo distribuida, mientras que este repositorio es

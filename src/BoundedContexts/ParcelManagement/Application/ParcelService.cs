@@ -44,6 +44,17 @@ public sealed class ListParcelsByProducerQueryHandler(IParcelRepository reposito
     }
 }
 
+public sealed class ListAvailableParcelsQueryHandler(IParcelRepository repository)
+    : IQueryHandler<ListAvailableParcelsQuery, IReadOnlyList<ParcelResponse>>
+{
+    public async Task<IReadOnlyList<ParcelResponse>> HandleAsync(
+        ListAvailableParcelsQuery query,
+        CancellationToken cancellationToken = default) =>
+        (await repository.ListAvailableAsync(cancellationToken))
+            .Select(ParcelMapping.Map)
+            .ToArray();
+}
+
 public sealed class ActivateParcelCommandHandler(IParcelRepository repository)
     : ICommandHandler<ActivateParcelCommand, bool>
 {

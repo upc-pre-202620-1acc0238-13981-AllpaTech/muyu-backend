@@ -13,6 +13,10 @@ public sealed record GetEscrowByIdQuery(Guid EscrowAccountId) : IQuery<EscrowAcc
 
 public sealed record FundEscrowRequest([Range(0.01, double.MaxValue)] decimal Amount);
 
+public sealed record FundEscrowByAccountRequest(
+    Guid EscrowAccountId,
+    [Range(0.01, double.MaxValue)] decimal Amount);
+
 public sealed record FundEscrowCommand(Guid EscrowAccountId, decimal Amount) : ICommand<bool>;
 
 public sealed record ReleasePayoutRequest(

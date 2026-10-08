@@ -9,6 +9,7 @@ namespace Muyu.Modules.Escrow.Presentation;
 [ApiController]
 [Authorize]
 [Route("api/escrow")]
+[Route("api/v1/escrow")]
 public sealed class EscrowController(
     ICommandHandler<OpenEscrowCommand, EscrowAccountResponse> openHandler,
     IQueryHandler<GetEscrowByIdQuery, EscrowAccountResponse?> getByIdHandler,
@@ -16,6 +17,7 @@ public sealed class EscrowController(
     ICommandHandler<ReleasePayoutCommand, PayoutResponse?> releaseHandler) : ControllerBase
 {
     [HttpPost]
+    [Authorize(Roles = "COMERCIANTE,ADMIN")]
     public async Task<ActionResult<EscrowAccountResponse>> Open(
         OpenEscrowCommand command,
         CancellationToken cancellationToken)
@@ -25,6 +27,7 @@ public sealed class EscrowController(
     }
 
     [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}/balance")]
     public async Task<ActionResult<EscrowAccountResponse>> GetById(Guid id, CancellationToken cancellationToken)
     {
         var account = await getByIdHandler.HandleAsync(new GetEscrowByIdQuery(id), cancellationToken);
@@ -32,6 +35,7 @@ public sealed class EscrowController(
     }
 
     [HttpPost("{id:guid}/fund")]
+    [Authorize(Roles = "COMERCIANTE,ADMIN")]
     public async Task<IActionResult> Fund(
         Guid id,
         FundEscrowRequest request,
@@ -40,7 +44,20 @@ public sealed class EscrowController(
             ? NoContent()
             : NotFound();
 
+    [HttpPost("fund")]
+    [Authorize(Roles = "COMERCIANTE,ADMIN")]
+    public async Task<IActionResult> FundByAccount(
+        FundEscrowByAccountRequest request,
+        CancellationToken cancellationToken) =>
+        await fundHandler.HandleAsync(
+            new FundEscrowCommand(request.EscrowAccountId, request.Amount),
+            cancellationToken)
+                ? NoContent()
+                : NotFound();
+
     [HttpPost("{id:guid}/payouts")]
+    [HttpPost("{id:guid}/release")]
+    [Authorize(Roles = "COMERCIANTE,ADMIN")]
     [ProducesResponseType<PayoutResponse>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PayoutResponse>> Release(
         Guid id,

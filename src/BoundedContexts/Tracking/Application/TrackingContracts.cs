@@ -17,6 +17,8 @@ public sealed record StoreEvidenceCommand(
     Stream Content,
     long SizeBytes,
     DateTimeOffset CapturedAtUtc,
+    double Latitude,
+    double Longitude,
     string? Note) : ICommand<EvidenceResponse?>;
 
 public sealed record SubmitMilestoneCommand(Guid MilestoneId) : ICommand<bool>;
@@ -41,6 +43,8 @@ public sealed record EvidenceResponse(
     string Sha256,
     long SizeBytes,
     DateTimeOffset CapturedAtUtc,
+    double Latitude,
+    double Longitude,
     string? Note);
 
 public sealed record MilestoneResponse(

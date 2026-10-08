@@ -29,6 +29,8 @@ public sealed class TrackingEntityConfiguration : IModuleEntityConfiguration
         evidence.Property(item => item.StorageUri).HasMaxLength(1000).IsRequired();
         evidence.Property(item => item.Sha256).HasMaxLength(64).IsRequired();
         evidence.Property(item => item.Note).HasMaxLength(500);
+        evidence.Property(item => item.Latitude).IsRequired();
+        evidence.Property(item => item.Longitude).IsRequired();
         evidence.HasIndex(item => new { item.MilestoneId, item.Sha256 }).IsUnique();
     }
 }

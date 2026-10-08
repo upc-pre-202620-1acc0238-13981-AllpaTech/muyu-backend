@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<RegisterParcelCommand, ParcelResponse>, RegisterParcelCommandHandler>();
         services.AddScoped<IQueryHandler<GetParcelByIdQuery, ParcelResponse?>, GetParcelByIdQueryHandler>();
         services.AddScoped<IQueryHandler<ListParcelsByProducerQuery, IReadOnlyList<ParcelResponse>>, ListParcelsByProducerQueryHandler>();
+        services.AddScoped<IQueryHandler<ListAvailableParcelsQuery, IReadOnlyList<ParcelResponse>>, ListAvailableParcelsQueryHandler>();
         services.AddScoped<ICommandHandler<ActivateParcelCommand, bool>, ActivateParcelCommandHandler>();
         return services;
     }

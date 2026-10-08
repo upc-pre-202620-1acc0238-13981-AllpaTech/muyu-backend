@@ -14,6 +14,8 @@ public sealed record GetParcelByIdQuery(Guid ParcelId) : IQuery<ParcelResponse?>
 
 public sealed record ListParcelsByProducerQuery(Guid ProducerId) : IQuery<IReadOnlyList<ParcelResponse>>;
 
+public sealed record ListAvailableParcelsQuery : IQuery<IReadOnlyList<ParcelResponse>>;
+
 public sealed record ActivateParcelCommand(Guid ParcelId) : ICommand<bool>;
 
 public sealed record ParcelResponse(

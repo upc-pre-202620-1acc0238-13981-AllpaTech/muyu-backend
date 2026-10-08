@@ -27,6 +27,14 @@ public sealed class ParcelRepository(MuyuDbContext dbContext) : IParcelRepositor
             .OrderBy(parcel => parcel.Name)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<Parcel>> ListAvailableAsync(
+        CancellationToken cancellationToken = default) =>
+        await dbContext.Set<Parcel>()
+            .AsNoTracking()
+            .Where(parcel => parcel.Status == ParcelStatus.Active)
+            .OrderBy(parcel => parcel.Name)
+            .ToListAsync(cancellationToken);
+
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         _ = await dbContext.SaveChangesAsync(cancellationToken);
 }

@@ -72,6 +72,8 @@ public sealed class StoreEvidenceCommandHandler(
             storedFile.Sha256,
             storedFile.SizeBytes,
             command.CapturedAtUtc,
+            command.Latitude,
+            command.Longitude,
             command.Note);
 
         await repository.SaveChangesAsync(cancellationToken);
@@ -142,5 +144,7 @@ internal static class TrackingMapping
             evidence.Sha256,
             evidence.SizeBytes,
             evidence.CapturedAtUtc,
+            evidence.Latitude,
+            evidence.Longitude,
             evidence.Note);
 }
