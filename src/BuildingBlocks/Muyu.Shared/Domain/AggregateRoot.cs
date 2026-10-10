@@ -10,10 +10,17 @@ public abstract class AggregateRoot : BaseEntity
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 
+    /// <summary>
+    /// Inicializa una raíz de agregado con un identificador generado automáticamente.
+    /// </summary>
     protected AggregateRoot()
     {
     }
 
+    /// <summary>
+    /// Inicializa una raíz de agregado con el identificador especificado.
+    /// </summary>
+    /// <param name="id">Identificador único de la raíz de agregado.</param>
     protected AggregateRoot(Guid id)
         : base(id)
     {
