@@ -136,8 +136,9 @@ módulos ni introduce dependencias circulares. `EnsureCreated` facilita esta pri
 al evolucionar el esquema se debe sustituir por migraciones de EF Core.
 
 IAM y Tracking incluyen actualizadores de compatibilidad para evolucionar sin pérdida la base SQLite
-creada por la primera versión del prototipo. La validación DNI/RUC usa un adaptador local de demostración;
-el puerto `IIdentityVerificationProvider` permite conectar RENIEC/SUNAT posteriormente.
+creada por la primera versión del prototipo. La validación de identidades y documentos se gestiona
+mediante flujos internos del dominio; el puerto `IIdentityVerificationProvider` permite adaptar
+proveedores de verificación adicionales según sea necesario.
 
 La correspondencia entre el reporte, los diagramas C4 y la implementación está documentada en
 [`docs/ARCHITECTURE-ALIGNMENT.md`](docs/ARCHITECTURE-ALIGNMENT.md).
