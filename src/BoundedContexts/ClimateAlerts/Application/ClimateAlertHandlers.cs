@@ -3,6 +3,8 @@ using Muyu.Shared.Application;
 
 namespace Muyu.Modules.ClimateAlerts.Application;
 
+// Obtiene las métricas meteorológicas en tiempo real de la parcela, evalúa las reglas de riesgo
+// y persiste únicamente las alertas climáticas activadas antes de proyectar el resultado.
 public sealed class MonitorParcelCommandHandler(
     IAlertRepository repository,
     IWeatherProvider weatherProvider) : ICommandHandler<MonitorParcelCommand, MonitoringResult>
@@ -29,6 +31,7 @@ public sealed class MonitorParcelCommandHandler(
     }
 }
 
+
 public sealed class ListOpenClimateAlertsQueryHandler(IAlertRepository repository)
     : IQueryHandler<ListOpenClimateAlertsQuery, IReadOnlyList<ClimateAlertResponse>>
 {
@@ -40,6 +43,8 @@ public sealed class ListOpenClimateAlertsQueryHandler(IAlertRepository repositor
             .ToArray();
 }
 
+// Maneja la transición de estado de una alerta (reconocimiento o resolución),
+// estampando la marca de tiempo UTC y confirmando la persistencia en el repositorio.
 public sealed class AcknowledgeClimateAlertCommandHandler(IAlertRepository repository)
     : ICommandHandler<AcknowledgeClimateAlertCommand, bool>
 {
@@ -78,6 +83,8 @@ public sealed class ResolveClimateAlertCommandHandler(IAlertRepository repositor
     }
 }
 
+// Evalúa las condiciones climáticas actuales frente a los umbrales configurados para la parcela,
+// generando de forma diferida (yield) las alertas por helada, calor extremo, lluvia o viento fuerte.
 internal static class ClimateAlertPolicy
 {
     internal static IEnumerable<ClimateAlert> Evaluate(
