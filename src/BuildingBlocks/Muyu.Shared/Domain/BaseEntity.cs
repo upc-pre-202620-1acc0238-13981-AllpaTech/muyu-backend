@@ -21,11 +21,24 @@ public abstract class BaseEntity
         Id = id;
     }
 
+    /// <summary>
+    /// Obtiene el identificador único de la entidad.
+    /// </summary>
     public Guid Id { get; protected init; } = Guid.NewGuid();
 
+    /// <summary>
+    /// Obtiene la fecha y hora UTC en que se creó la entidad.
+    /// </summary>
     public DateTimeOffset CreatedAtUtc { get; protected init; } = DateTimeOffset.UtcNow;
 
+    /// <summary>
+    /// Obtiene la fecha y hora UTC de la última actualización, o <see langword="null"/>
+    /// si la entidad aún no se ha marcado como actualizada.
+    /// </summary>
     public DateTimeOffset? UpdatedAtUtc { get; private set; }
 
+    /// <summary>
+    /// Marca la entidad con la fecha y hora UTC actuales como última actualización.
+    /// </summary>
     protected void MarkAsUpdated() => UpdatedAtUtc = DateTimeOffset.UtcNow;
 }
