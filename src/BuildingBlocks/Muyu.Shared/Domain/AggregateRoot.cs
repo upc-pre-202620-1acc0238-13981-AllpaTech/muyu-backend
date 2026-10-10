@@ -26,10 +26,24 @@ public abstract class AggregateRoot : BaseEntity
     {
     }
 
+    /// <summary>
+    /// Obtiene una vista de solo lectura de los eventos de dominio pendientes.
+    /// </summary>
+    /// <returns>Vista de solo lectura de los eventos registrados en esta raíz.</returns>
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
 
+    /// <summary>
+    /// Elimina todos los eventos de dominio pendientes de esta raíz.
+    /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
 
+    /// <summary>
+    /// Registra un evento de dominio generado por un cambio en esta raíz.
+    /// </summary>
+    /// <param name="domainEvent">Evento que se agrega a la colección de eventos pendientes.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Se produce si <paramref name="domainEvent"/> es <see langword="null"/>.
+    /// </exception>
     protected void RaiseDomainEvent(IDomainEvent domainEvent)
     {
         ArgumentNullException.ThrowIfNull(domainEvent);
