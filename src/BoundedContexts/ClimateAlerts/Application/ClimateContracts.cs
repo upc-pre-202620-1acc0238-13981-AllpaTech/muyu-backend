@@ -4,6 +4,8 @@ using Muyu.Shared.Application;
 
 namespace Muyu.Modules.ClimateAlerts.Application;
 
+// Define la solicitud de monitoreo con validación de rango geográfico (lat/lon)
+// y umbrales agronómicos predeterminados para disparar alertas climáticas.
 public sealed record MonitorParcelCommand(
     Guid ParcelId,
     [Range(-90, 90)] double Latitude,
@@ -13,6 +15,8 @@ public sealed record MonitorParcelCommand(
     decimal HeavyRainThresholdMillimeters = 25,
     decimal StrongWindThresholdKilometersPerHour = 60) : ICommand<MonitoringResult>;
 
+// Define las operaciones CQRS para consultar alertas abiertas y mutar
+// el estado del ciclo de vida de una alerta (reconocimiento o resolución).
 public sealed record ListOpenClimateAlertsQuery(
     Guid ParcelId) : IQuery<IReadOnlyList<ClimateAlertResponse>>;
 
@@ -20,6 +24,8 @@ public sealed record AcknowledgeClimateAlertCommand(Guid AlertId) : ICommand<boo
 
 public sealed record ResolveClimateAlertCommand(Guid AlertId) : ICommand<bool>;
 
+// Encapsula las lecturas meteorológicas observadas y las alertas derivadas,
+// sirviendo como contrato inmutable de respuesta hacia capas externas.
 public sealed record WeatherSnapshot(
     decimal TemperatureCelsius,
     decimal RainLastHourMillimeters,
