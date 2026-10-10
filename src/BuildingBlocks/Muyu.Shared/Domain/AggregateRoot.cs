@@ -1,8 +1,11 @@
 namespace Muyu.Shared.Domain;
 
 /// <summary>
-/// Marca una entidad como raíz de agregado y, por tanto, como frontera transaccional.
+/// Representa la raíz de un agregado y mantiene los eventos de dominio generados por sus cambios.
 /// </summary>
+/// <remarks>
+/// Los eventos permanecen pendientes hasta que la infraestructura los publica y limpia.
+/// </remarks>
 public abstract class AggregateRoot : BaseEntity
 {
     private readonly List<IDomainEvent> _domainEvents = [];
