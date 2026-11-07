@@ -214,11 +214,10 @@ await using (var scope = app.Services.CreateAsyncScope())
     await seeder.SeedAsync();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Keep the API contract available in Railway so mobile integration can be
+// verified without weakening authorization on protected operations.
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseWhen(
     context => !context.Request.Path.StartsWithSegments("/health"),
