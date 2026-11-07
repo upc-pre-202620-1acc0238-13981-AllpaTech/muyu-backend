@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Muyu.Modules.IAM.Application;
 using Muyu.Shared.Application;
 
@@ -12,7 +13,9 @@ namespace Muyu.Modules.IAM.Presentation;
 public sealed class AuthController(
     ICommandHandler<LoginCommand, LoginResponse?> loginHandler,
     ICommandHandler<RegisterAgricultorCommand, UserProfileResponse> registerAgricultorHandler,
-    ICommandHandler<RegisterComercianteCommand, UserProfileResponse> registerComercianteHandler) : ControllerBase
+    ICommandHandler<RegisterComercianteCommand, UserProfileResponse> registerComercianteHandler,
+    ICommandHandler<RegisterMobileAccountCommand, UserProfileResponse> registerMobileHandler,
+    ChangePasswordCommandHandler changePasswordHandler) : ControllerBase
 {
     /// <summary>Registra una cuenta con el rol Agricultor y valida su DNI.</summary>
     [AllowAnonymous]
@@ -36,6 +39,16 @@ public sealed class AuthController(
         RegisterAsync(
             () => registerComercianteHandler.HandleAsync(command, cancellationToken));
 
+    /// <summary>Registers one verified account for both mobile experiences.</summary>
+    [AllowAnonymous]
+    [HttpPost("register")]
+    [ProducesResponseType<UserProfileResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    public Task<ActionResult<UserProfileResponse>> RegisterMobile(
+        [FromBody] RegisterMobileAccountCommand command,
+        CancellationToken cancellationToken) =>
+        RegisterAsync(() => registerMobileHandler.HandleAsync(command, cancellationToken));
+
     /// <summary>Autentica un usuario y emite un access token JWT.</summary>
     [AllowAnonymous]
     [HttpPost("login")]
@@ -55,6 +68,34 @@ public sealed class AuthController(
                 Detail = "El correo o la contraseña no son válidos.",
                 Status = StatusCodes.Status401Unauthorized
             });
+    }
+
+    /// <summary>Changes the password after verifying the authenticated user's current password.</summary>
+    [Authorize]
+    [HttpPost("change-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangePasswordCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var changed = await changePasswordHandler.HandleForUserAsync(userId, command, cancellationToken);
+        if (!changed)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "No se pudo cambiar la contraseña",
+                Detail = "La contraseña actual no es válida.",
+                Status = StatusCodes.Status400BadRequest
+            });
+        }
+
+        return NoContent();
     }
 
     private async Task<ActionResult<UserProfileResponse>> RegisterAsync(

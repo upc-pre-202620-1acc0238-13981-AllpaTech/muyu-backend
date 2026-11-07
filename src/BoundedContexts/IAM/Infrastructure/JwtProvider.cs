@@ -26,9 +26,19 @@ public sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.Name, user.DisplayName),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(ClaimTypes.Role, user.Role?.Name ?? "USER")
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
+        if (string.Equals(user.Role?.Name, Role.Administrator, StringComparison.OrdinalIgnoreCase))
+        {
+            claims.Add(new Claim(ClaimTypes.Role, Role.Administrator));
+        }
+        else
+        {
+            // A MUYU account can operate in either mobile experience.
+            claims.Add(new Claim(ClaimTypes.Role, Role.Agricultor));
+            claims.Add(new Claim(ClaimTypes.Role, Role.Comerciante));
+        }
 
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,

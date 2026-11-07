@@ -23,6 +23,11 @@ public sealed class UserRepository(MuyuDbContext dbContext) : IUserRepository
             .Include(user => user.Role)
             .SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
 
+    public Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+        dbContext.Set<User>()
+            .Include(user => user.Role)
+            .SingleOrDefaultAsync(user => user.Id == id, cancellationToken);
+
     public Task<bool> ExistsByEmailAsync(
         string normalizedEmail,
         CancellationToken cancellationToken = default) =>

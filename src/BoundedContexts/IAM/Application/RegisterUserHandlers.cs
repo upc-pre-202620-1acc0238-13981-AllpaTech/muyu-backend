@@ -36,6 +36,21 @@ public sealed class RegisterComercianteCommandHandler(
             cancellationToken);
 }
 
+public sealed class RegisterMobileAccountCommandHandler(UserRegistrationService registrationService)
+    : ICommandHandler<RegisterMobileAccountCommand, UserProfileResponse>
+{
+    public Task<UserProfileResponse> HandleAsync(
+        RegisterMobileAccountCommand command,
+        CancellationToken cancellationToken = default) =>
+        registrationService.RegisterAsync(
+            command.Email,
+            command.Password,
+            command.Name,
+            IdentityDocument.Create(IdentityDocumentType.Dni, command.Dni),
+            Role.Agricultor,
+            cancellationToken);
+}
+
 public sealed class UserRegistrationService(
     IUserRepository userRepository,
     IRoleRepository roleRepository,

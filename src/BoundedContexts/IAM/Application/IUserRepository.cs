@@ -8,6 +8,8 @@ public interface IUserRepository
 
     Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
     Task<bool> ExistsByEmailAsync(string normalizedEmail, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsByDocumentAsync(string documentNumber, CancellationToken cancellationToken = default);
