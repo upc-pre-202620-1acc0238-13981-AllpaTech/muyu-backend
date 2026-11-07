@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,6 @@ namespace Muyu.Modules.ParcelManagement.Presentation;
 
 [ApiController]
 [Authorize]
-[Route("api/parcels")]
 [Route("api/v1/parcels")]
 public sealed class ParcelsController(
     ICommandHandler<RegisterParcelCommand, ParcelResponse> registerHandler,
@@ -24,7 +24,10 @@ public sealed class ParcelsController(
         RegisterParcelCommand command,
         CancellationToken cancellationToken)
     {
-        var parcel = await registerHandler.HandleAsync(command, cancellationToken);
+        var ownerId = GetAuthenticatedUserId();
+        var parcel = await registerHandler.HandleAsync(
+            command with { ProducerId = ownerId },
+            cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = parcel.Id }, parcel);
     }
 
@@ -38,12 +41,20 @@ public sealed class ParcelsController(
     }
 
     [HttpGet]
+    [Authorize(Roles = "AGRICULTOR,ADMIN")]
     public async Task<ActionResult<IReadOnlyList<ParcelResponse>>> ListByProducer(
-        [FromQuery] Guid producerId,
-        CancellationToken cancellationToken) =>
-        Ok(await listHandler.HandleAsync(new ListParcelsByProducerQuery(producerId), cancellationToken));
+        [FromQuery] Guid? producerId,
+        CancellationToken cancellationToken)
+    {
+        var requestedProducerId = User.IsInRole("ADMIN") && producerId.HasValue
+            ? producerId.Value
+            : GetAuthenticatedUserId();
 
-    [HttpPost("{id:guid}/activate")]
+        return Ok(await listHandler.HandleAsync(
+            new ListParcelsByProducerQuery(requestedProducerId),
+            cancellationToken));
+    }
+
     [HttpPut("{id:guid}/approve")]
     [Authorize(Roles = "ADMIN")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -58,4 +69,15 @@ public sealed class ParcelsController(
     public async Task<ActionResult<IReadOnlyList<ParcelResponse>>> Catalog(
         CancellationToken cancellationToken) =>
         Ok(await catalogHandler.HandleAsync(new ListAvailableParcelsQuery(), cancellationToken));
+
+    private Guid GetAuthenticatedUserId()
+    {
+        var identifier = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue("sub");
+
+        return Guid.TryParse(identifier, out var userId)
+            ? userId
+            : throw new InvalidOperationException(
+                "El token no contiene un identificador de usuario válido.");
+    }
 }

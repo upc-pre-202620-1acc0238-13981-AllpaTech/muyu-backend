@@ -22,10 +22,51 @@ public sealed class IamDataSeeder(
         await EnsureRoleAsync(ComercianteRoleId, Role.Comerciante, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        var seedSection = configuration.GetSection("Iam:SeedUser");
-        var email = seedSection["Email"];
-        var password = seedSection["Password"];
-        var displayName = seedSection["DisplayName"] ?? "Administrador Muyu";
+        await EnsureConfiguredUserAsync(
+            configuration.GetSection("Iam:SeedUser"),
+            AdministratorRoleId,
+            IdentityDocumentType.Dni,
+            "99999999",
+            cancellationToken);
+
+        foreach (var demoSection in configuration.GetSection("Iam:DemoUsers").GetChildren())
+        {
+            var roleName = demoSection["Role"]?.Trim().ToUpperInvariant();
+            var (roleId, defaultDocumentType) = roleName switch
+            {
+                Role.Agricultor => (AgricultorRoleId, IdentityDocumentType.Dni),
+                Role.Comerciante => (ComercianteRoleId, IdentityDocumentType.Ruc),
+                _ => throw new InvalidOperationException("El usuario demo tiene un rol no válido.")
+            };
+
+            var documentType = Enum.TryParse<IdentityDocumentType>(
+                demoSection["DocumentType"],
+                true,
+                out var parsedType)
+                    ? parsedType
+                    : defaultDocumentType;
+
+            await EnsureConfiguredUserAsync(
+                demoSection,
+                roleId,
+                documentType,
+                demoSection["DocumentNumber"] ?? string.Empty,
+                cancellationToken);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task EnsureConfiguredUserAsync(
+        IConfigurationSection section,
+        Guid roleId,
+        IdentityDocumentType documentType,
+        string documentNumber,
+        CancellationToken cancellationToken)
+    {
+        var email = section["Email"];
+        var password = section["Password"];
+        var displayName = section["DisplayName"] ?? "Usuario Muyu";
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
@@ -33,20 +74,20 @@ public sealed class IamDataSeeder(
         }
 
         var normalizedEmail = User.NormalizeEmail(email);
-        if (await dbContext.Set<User>().AnyAsync(user => user.Email == normalizedEmail, cancellationToken))
+        if (await dbContext.Set<User>().AnyAsync(
+                user => user.Email == normalizedEmail,
+                cancellationToken))
         {
             return;
         }
 
-        var administrator = User.Create(
+        var user = User.Create(
             normalizedEmail,
             displayName,
-            IdentityDocument.Create(IdentityDocumentType.Dni, "99999999"),
-            AdministratorRoleId);
-        administrator.ChangePasswordHash(passwordHasher.HashPassword(administrator, password));
-
-        dbContext.Add(administrator);
-        await dbContext.SaveChangesAsync(cancellationToken);
+            IdentityDocument.Create(documentType, documentNumber),
+            roleId);
+        user.ChangePasswordHash(passwordHasher.HashPassword(user, password));
+        dbContext.Add(user);
     }
 
     private async Task EnsureRoleAsync(

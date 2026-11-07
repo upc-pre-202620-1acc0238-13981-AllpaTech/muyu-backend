@@ -9,7 +9,6 @@ namespace Muyu.Modules.Tracking.Presentation;
 
 [ApiController]
 [Authorize]
-[Route("api/milestones")]
 [Route("api/v1/milestones")]
 public sealed class EvidencesController(
     ICommandHandler<ScheduleMilestoneCommand, MilestoneResponse> scheduleHandler,

@@ -7,7 +7,6 @@ using Muyu.Shared.Application;
 namespace Muyu.Modules.IAM.Presentation;
 
 [ApiController]
-[Route("api/auth")]
 [Route("api/v1/auth")]
 [Produces("application/json")]
 public sealed class AuthController(

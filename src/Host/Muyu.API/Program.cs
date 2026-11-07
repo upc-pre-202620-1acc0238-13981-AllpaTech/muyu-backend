@@ -5,6 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Muyu.API;
 using Muyu.Modules.Agreements.Infrastructure;
 using Muyu.Modules.Agreements.Presentation;
 using Muyu.Modules.ClimateAlerts.Infrastructure;
@@ -106,6 +107,8 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 builder.Services
     .AddControllers()
@@ -170,10 +173,36 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MuyuDbContext>();
     await dbContext.Database.EnsureCreatedAsync();
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS mobile_app_states (
+            UserId TEXT NOT NULL CONSTRAINT PK_mobile_app_states PRIMARY KEY,
+            PayloadJson TEXT NOT NULL,
+            UpdatedAtUtc TEXT NOT NULL
+        );
+        """);
+    await dbContext.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS mobile_plots (
+            Id INTEGER NOT NULL CONSTRAINT PK_mobile_plots PRIMARY KEY,
+            OwnerId TEXT NOT NULL,
+            OwnerEmail TEXT NOT NULL,
+            FundedByEmail TEXT NULL,
+            PayloadJson TEXT NOT NULL,
+            UpdatedAtUtc TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS mobile_visits (
+            Id INTEGER NOT NULL CONSTRAINT PK_mobile_visits PRIMARY KEY,
+            FarmerEmail TEXT NOT NULL,
+            MerchantEmail TEXT NOT NULL,
+            PayloadJson TEXT NOT NULL,
+            UpdatedAtUtc TEXT NOT NULL
+        );
+        """);
 
     var iamSchemaUpgrade = scope.ServiceProvider.GetRequiredService<IamSchemaUpgrade>();
     await iamSchemaUpgrade.ApplyAsync();

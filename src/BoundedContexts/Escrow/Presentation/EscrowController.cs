@@ -8,7 +8,6 @@ namespace Muyu.Modules.Escrow.Presentation;
 
 [ApiController]
 [Authorize]
-[Route("api/escrow")]
 [Route("api/v1/escrow")]
 public sealed class EscrowController(
     ICommandHandler<OpenEscrowCommand, EscrowAccountResponse> openHandler,
@@ -26,7 +25,6 @@ public sealed class EscrowController(
         return CreatedAtAction(nameof(GetById), new { id = account.Id }, account);
     }
 
-    [HttpGet("{id:guid}")]
     [HttpGet("{id:guid}/balance")]
     public async Task<ActionResult<EscrowAccountResponse>> GetById(Guid id, CancellationToken cancellationToken)
     {
@@ -44,18 +42,6 @@ public sealed class EscrowController(
             ? NoContent()
             : NotFound();
 
-    [HttpPost("fund")]
-    [Authorize(Roles = "COMERCIANTE,ADMIN")]
-    public async Task<IActionResult> FundByAccount(
-        FundEscrowByAccountRequest request,
-        CancellationToken cancellationToken) =>
-        await fundHandler.HandleAsync(
-            new FundEscrowCommand(request.EscrowAccountId, request.Amount),
-            cancellationToken)
-                ? NoContent()
-                : NotFound();
-
-    [HttpPost("{id:guid}/payouts")]
     [HttpPost("{id:guid}/release")]
     [Authorize(Roles = "COMERCIANTE,ADMIN")]
     [ProducesResponseType<PayoutResponse>(StatusCodes.Status200OK)]

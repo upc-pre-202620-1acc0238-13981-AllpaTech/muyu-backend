@@ -8,7 +8,6 @@ namespace Muyu.Modules.Agreements.Presentation;
 
 [ApiController]
 [Authorize]
-[Route("api/agreements")]
 [Route("api/v1/agreements")]
 public sealed class AgreementsController(
     ICommandHandler<CreateAgreementCommand, AgreementResponse> createHandler,
@@ -40,7 +39,6 @@ public sealed class AgreementsController(
         CancellationToken cancellationToken) =>
         Ok(await listHandler.HandleAsync(new ListAgreementsByProducerQuery(producerId), cancellationToken));
 
-    [HttpPost("{id:guid}/activate")]
     [HttpPut("{id:guid}/sign")]
     [Authorize(Roles = "COMERCIANTE,ADMIN")]
     public async Task<IActionResult> Activate(Guid id, CancellationToken cancellationToken) =>

@@ -39,7 +39,7 @@ Presentation/
 ```
 
 Los artefactos temporales `bin` y `obj` no son capas ni código fuente. `Directory.Build.props`
-los redirige a `work/build`, fuera de los módulos.
+los redirige a `work/build` dentro de la raíz del repositorio y fuera de los módulos.
 
 ## Ejecutar
 
@@ -91,7 +91,8 @@ utiliza `evidence-storage` junto a los binarios de ejecución.
 - `GET /api/v1/catalog/parcels`
 - `POST|GET /api/v1/agreements`
 - `PUT /api/v1/agreements/{id}/sign`
-- `POST|GET /api/v1/escrow`
+- `POST /api/v1/escrow`
+- `GET /api/v1/escrow/{id}/balance`
 - `POST /api/v1/escrow/{id}/fund`
 - `POST /api/v1/escrow/{id}/release`
 - `POST|GET /api/v1/milestones`
@@ -99,6 +100,10 @@ utiliza `evidence-storage` junto a los binarios de ejecución.
 - `PUT /api/v1/milestones/{id}/approve|reject`
 - `POST /api/v1/webhooks/weather-update`
 - `GET /api/v1/alerts/{parcelId}`
+
+Todas las operaciones públicas usan exclusivamente el prefijo `/api/v1`. Se eliminaron los
+alias históricos bajo `/api` y las rutas alternativas que ejecutaban la misma operación, por lo
+que Swagger expone una sola combinación de método HTTP y ruta para cada caso de uso.
 
 ## Decisiones de arquitectura
 
