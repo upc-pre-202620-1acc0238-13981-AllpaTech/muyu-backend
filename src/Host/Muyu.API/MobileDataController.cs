@@ -23,6 +23,15 @@ public sealed class MobileDataController(MuyuDbContext dbContext) : ControllerBa
         "weatherMeasures", "visitOutcome", "visitDate", "agreedPrice", "harvestIncidents"
     };
 
+    /// <summary>
+    /// The owner reports cultivation progress, but funding belongs to the merchant:
+    /// a client with stale data must not be able to undo it.
+    /// </summary>
+    private static readonly HashSet<string> OwnerProgressFields = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "stage", "progress"
+    };
+
     private static readonly HashSet<string> MerchantFields = new(StringComparer.OrdinalIgnoreCase)
     {
         "status", "stage", "progress", "fundedByEmail", "milestoneStates", "visitOutcome",
@@ -54,6 +63,7 @@ public sealed class MobileDataController(MuyuDbContext dbContext) : ControllerBa
             if (!SameEmail(ownerEmail, callerEmail)) return Forbid();
             incoming["id"] = id;
             incoming["ownerEmail"] = callerEmail;
+            incoming["fundedByEmail"] = null;
             existing = new MobilePlotData
             {
                 Id = id,
@@ -68,11 +78,16 @@ public sealed class MobileDataController(MuyuDbContext dbContext) : ControllerBa
         {
             if (!SameEmail(ownerEmail, existing.OwnerEmail)) return BadRequest("The plot owner cannot change.");
             var stored = JsonNode.Parse(existing.PayloadJson)!.AsObject();
-            if (existing.OwnerId == callerId || User.IsInRole("ADMIN"))
+            if (User.IsInRole("ADMIN"))
             {
                 MergeAllowed(stored, incoming, FarmerFields);
                 MergeAllowed(stored, incoming, MerchantFields);
                 existing.FundedByEmail = incoming["fundedByEmail"]?.GetValue<string>();
+            }
+            else if (existing.OwnerId == callerId)
+            {
+                MergeAllowed(stored, incoming, FarmerFields);
+                MergeAllowed(stored, incoming, OwnerProgressFields);
             }
             else
             {
