@@ -202,6 +202,14 @@ await using (var scope = app.Services.CreateAsyncScope())
             PayloadJson TEXT NOT NULL,
             UpdatedAtUtc TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS mobile_incidents (
+            Id INTEGER NOT NULL CONSTRAINT PK_mobile_incidents PRIMARY KEY AUTOINCREMENT,
+            UserId TEXT NOT NULL,
+            Type TEXT NOT NULL,
+            Description TEXT NOT NULL,
+            CreatedAtUtc TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS IX_mobile_incidents_UserId ON mobile_incidents (UserId);
         """);
 
     var iamSchemaUpgrade = scope.ServiceProvider.GetRequiredService<IamSchemaUpgrade>();

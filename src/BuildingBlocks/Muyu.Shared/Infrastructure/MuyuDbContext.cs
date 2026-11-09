@@ -12,6 +12,7 @@ public sealed class MuyuDbContext(
     public DbSet<MobileAppState> MobileAppStates => Set<MobileAppState>();
     public DbSet<MobilePlotData> MobilePlots => Set<MobilePlotData>();
     public DbSet<MobileVisitData> MobileVisits => Set<MobileVisitData>();
+    public DbSet<MobileIncidentData> MobileIncidents => Set<MobileIncidentData>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,6 +48,16 @@ public sealed class MuyuDbContext(
             entity.Property(item => item.FarmerEmail).IsRequired();
             entity.Property(item => item.MerchantEmail).IsRequired();
             entity.Property(item => item.PayloadJson).IsRequired();
+        });
+
+        modelBuilder.Entity<MobileIncidentData>(entity =>
+        {
+            entity.ToTable("mobile_incidents");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.UserId).IsRequired();
+            entity.Property(item => item.Type).IsRequired();
+            entity.Property(item => item.Description).IsRequired();
+            entity.HasIndex(item => item.UserId);
         });
     }
 
@@ -110,6 +121,15 @@ public sealed class MobilePlotData
     public string? FundedByEmail { get; set; }
     public string PayloadJson { get; set; } = "{}";
     public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+public sealed class MobileIncidentData
+{
+    public int Id { get; set; }
+    public Guid UserId { get; set; }
+    public string Type { get; set; } = "";
+    public string Description { get; set; } = "";
+    public DateTimeOffset CreatedAtUtc { get; set; }
 }
 
 public sealed class MobileVisitData
